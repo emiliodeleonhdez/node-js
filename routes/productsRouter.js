@@ -1,33 +1,23 @@
 const { request, response } = require("express");
 const express = require("express");
 const faker = require("faker");
+const product = require("../usecases/products");
 
 const router = express.Router();
 
-router.get("/", (request, response) => {
+router.get("/", async (request, response, next) => {
   const products = [];
   const { limit } = request.query;
 
-  for (let index = 0; index < limit; index++) {
-    products.push({
-      name: faker.commerce.productName(),
-      price: parseInt(faker.commerce.price(), 10),
-      image: faker.image.imageUrl(),
-    });
-  }
-
-  if (limit) {
-    // Si tiene limite entonces
+  try {
+    const products = await product.get();
     response.json({
       ok: true,
-      payload: products,
+      message: "Done!",
+      payload: { products },
     });
-  } else {
-    //Si no tiene limite
-    response.json({
-      ok: false,
-      message: "El límite y la pagina son obligatorios",
-    });
+  } catch (error) {
+    next(error);
   }
 });
 
